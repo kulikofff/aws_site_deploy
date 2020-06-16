@@ -1,0 +1,69 @@
+---
+# tasks file for role
+
+  - name: Deploy site
+    ping:
+
+  - block: # for Ubuntu
+
+      - name: Say Hello to All
+        debug: msg"Hello {{ item }}"
+        loop:
+         - "Item1"
+         - "Item2"
+
+      - name: Loop Until End
+        shell: echo -n Z >> Test.txt && cat Test.txt
+        register: output
+        delay: 2
+        retries: 10
+        until: output.stdout.find("ZZZZ") == false
+        delegate_to: 127.0.0.1
+
+
+      - name: Print Final output
+        debug:
+          var: output.stdout
+
+      - name: get IP
+        debug: msg={{ansible_default_ipv4}}
+
+      - name: get OS
+        debug: msg={{ansible_os_family}}
+
+      - name: uptime
+        shell: uptime
+        register: results
+
+      - name: debug
+        debug:
+          var: results.stdout
+
+      - name: Install Apache for Ubuntu
+        apt:  name=apache2 update_cache=yes state=latest
+        ignore_errors: yes 
+
+      - name: Start Apache
+        service: name=apache2 state=started enabled=yes
+        ignore_errors: yes
+
+      - name: Install Python
+        apt: name=python state=latest
+
+      - name: Deploy Site
+        shell: echo -n "<html><body bgcolor=black><center><h2><p><font color=red>Hello Andrey</h2></center></body></html" > /var/www/html/index.html
+        shell: echo -n "Userdata executed on $(data)" >> /var/www/html/log.txt       
+
+      - name: reboot
+        shell: sleep 3 && reboot now
+        async: 1
+        poll: 0      
+       
+      - name: wait until up
+        wait_for:
+            delay: 5
+            timeout: 40
+        delegate_to: 127.0.0.1   
+
+    when: ansible_os_family == "Debian"
+
