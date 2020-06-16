@@ -52,6 +52,8 @@
 
       - name: Deploy Site
         shell: echo -n "<html><body bgcolor=black><center><h2><p><font color=red>Hello Andrey</h2></center></body></html" > /var/www/html/index.html
+        
+      - name: Deploy Site Log  
         shell: echo -n "Userdata executed on $(data)" >> /var/www/html/log.txt       
 
       - name: reboot
